@@ -1,0 +1,18 @@
+name: StackScan Mercenary
+on:
+  repository_dispatch:
+    types: [start_scan]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    # Aquí es donde ocurre la magia: usamos la imagen ya construida
+    container:
+      image: ghcr.io/tu-usuario/stackscan-mercenary:latest
+    
+    steps:
+      - name: Ejecutar Escaneo Profundo
+        env:
+          SCAN_URL: ${{ github.event.client_payload.url }}
+          CALLBACK_URL: ${{ github.event.client_payload.callback_url }}
+        run: node /app/scanner.js
