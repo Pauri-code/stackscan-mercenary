@@ -12,7 +12,7 @@ const puppeteer = require('puppeteer-core');
 
     page.on('request', request => { networkRequests.push(request.url()); });
     page.on('response', response => {
-        if (response.url() === url || response.url() === url + '/') {
+        if (response.status() < 300 && response.url().startsWith('https://')) {
             Object.assign(responseHeaders, response.headers());
         }
     });
