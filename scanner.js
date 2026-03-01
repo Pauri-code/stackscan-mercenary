@@ -26,7 +26,7 @@ const puppeteer = require('puppeteer-core');
         const html = await page.content();
         payload = {
             url,
-            html: html.substring(0, 50000),
+            html: html.substring(0, 150000),
             windowVars,
             networkRequests: networkRequests.slice(0, 200)
         };
