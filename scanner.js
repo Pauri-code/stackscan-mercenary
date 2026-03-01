@@ -8,10 +8,17 @@ const puppeteer = require('puppeteer-core');
     });
     const page = await browser.newPage();
     const networkRequests = [];
+    const responseHeaders = {};
+
     page.on('request', request => { networkRequests.push(request.url()); });
-    
-    let payload = { url, html: '', windowVars: [], networkRequests: [], error: null };
-    
+    page.on('response', response => {
+        if (response.url() === url || response.url() === url + '/') {
+            Object.assign(responseHeaders, response.headers());
+        }
+    });
+
+    let payload = { url, html: '', responseHeaders: {}, windowVars: [], networkRequests: [], error: null };
+
     try {
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
         const windowVars = await page.evaluate(() => {
@@ -27,6 +34,7 @@ const puppeteer = require('puppeteer-core');
         payload = {
             url,
             html: html.substring(0, 150000),
+            responseHeaders,
             windowVars,
             networkRequests: networkRequests.slice(0, 200)
         };
@@ -36,7 +44,7 @@ const puppeteer = require('puppeteer-core');
     } finally {
         await browser.close();
     }
-    
+
     let retries = 3;
     while (retries > 0) {
         try {
