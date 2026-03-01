@@ -45,7 +45,7 @@ const puppeteer = require('puppeteer-core');
         await browser.close();
     }
 
-    let retries = 3;
+    let retries = 5;
     while (retries > 0) {
         try {
             await fetch(callbackUrl, {
@@ -56,8 +56,9 @@ const puppeteer = require('puppeteer-core');
             break;
         } catch (e) {
             retries--;
-            if (retries === 0) console.error('Callback failed after 3 retries:', e.message);
-            else await new Promise(r => setTimeout(r, 3000));
+            console.log(`Retry ${5 - retries}/5 failed: ${e.message}`);
+            if (retries === 0) console.error('Callback failed after 5 retries');
+            else await new Promise(r => setTimeout(r, 5000));
         }
     }
 })();
