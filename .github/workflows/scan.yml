@@ -5,14 +5,18 @@ on:
 
 jobs:
   scan:
-    runs-on: ubuntu-latest
-    # Aquí es donde ocurre la magia: usamos la imagen ya construida
-    container:
-      image: ghcr.io/tu-usuario/stackscan-mercenary:latest
-    
+    runs-on: ubuntu-latest # Usamos la máquina estándar de GitHub con 7GB de RAM
     steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Instalar dependencias
+        run: npm install puppeteer-core
+
       - name: Ejecutar Escaneo Profundo
         env:
           SCAN_URL: ${{ github.event.client_payload.url }}
           CALLBACK_URL: ${{ github.event.client_payload.callback_url }}
-        run: node /app/scanner.js
+          # Usamos el Chrome que ya viene preinstalado en el servidor de GitHub
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
+        run: node scanner.js
