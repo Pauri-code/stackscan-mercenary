@@ -1,3 +1,11 @@
+- name: Cache Node Modules
+  uses: actions/cache@v4
+  with:
+    path: ~/.npm
+    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+    restore-keys: |
+      ${{ runner.os }}-node-
+
 const puppeteer = require('puppeteer-core');
 (async () => {
     const url = process.env.SCAN_URL;
