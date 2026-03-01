@@ -8,11 +8,12 @@ const puppeteer = require('puppeteer-core');
     });
     const page = await browser.newPage();
     const networkRequests = [];
-    page.on('request', request => {
-        networkRequests.push(request.url());
-    });
+    page.on('request', request => { networkRequests.push(request.url()); });
+    
+    let payload = { url, html: '', windowVars: [], networkRequests: [], error: null };
+    
     try {
-        await page.goto(url, { waitUntil: 'networkidle0', timeout: 20000 });
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
         const windowVars = await page.evaluate(() => {
             return Object.keys(window).filter(k => 
                 ['React','__NEXT_DATA__','__NUXT__','__vue_app__','Intercom',
@@ -23,20 +24,23 @@ const puppeteer = require('puppeteer-core');
             );
         });
         const html = await page.content();
-        const payload = {
+        payload = {
             url,
             html: html.substring(0, 50000),
             windowVars,
             networkRequests: networkRequests.slice(0, 200)
         };
-        await fetch(callbackUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
     } catch (e) {
         console.error("Fallo en el escaneo:", e);
+        payload.error = e.message;
     } finally {
         await browser.close();
     }
+    
+    // Siempre llama al callback, incluso si hubo error
+    await fetch(callbackUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
 })();
