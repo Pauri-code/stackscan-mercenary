@@ -37,10 +37,19 @@ const puppeteer = require('puppeteer-core');
         await browser.close();
     }
     
-    // Siempre llama al callback, incluso si hubo error
-    await fetch(callbackUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
+    let retries = 3;
+    while (retries > 0) {
+        try {
+            await fetch(callbackUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            break;
+        } catch (e) {
+            retries--;
+            if (retries === 0) console.error('Callback failed after 3 retries:', e.message);
+            else await new Promise(r => setTimeout(r, 3000));
+        }
+    }
 })();
