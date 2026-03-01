@@ -10,6 +10,16 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
+      # --- NIVEL 0: CACHÉ ACTIVADA ---
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      # -------------------------------
+
       - name: Instalar dependencias
         run: npm install puppeteer-core
 
